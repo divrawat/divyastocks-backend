@@ -13,17 +13,10 @@ export const create = async (req, res) => {
         const form = new formidable.IncomingForm();
         form.keepExtensions = true;
 
-        form.parse(req, async (err, fields, files) => {
+        form.parse(req, async (err, fields) => {
             if (err) { return res.status(400).json({ error: 'Image could not upload' }); }
 
             const { title, body, slug, mtitle, mdesc, date, categories, photo } = fields;
-
-            if (!title || !title.length) { return res.status(400).json({ error: 'title is required' }) }
-            if (!date || !date.length) { return res.status(400).json({ error: 'date is required' }) }
-            if (!slug || !slug.length) { return res.status(400).json({ error: 'slug is required' }) }
-            if (!mtitle || !mtitle.length) { return res.status(400).json({ error: 'mtitle is required' }) }
-            if (!mdesc || !mdesc.length) { return res.status(400).json({ error: 'mdesc is required' }) }
-            if (!body || body.length < 200) { return res.status(400).json({ error: 'Content is too short' }) }
             if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
 
             let blog = new Blog();
@@ -66,11 +59,8 @@ export const update = async (req, res) => {
 
             _.merge(oldBlog, fields);
 
-            const { title, mtitle, mdesc, body, categories, slug } = fields;
+            const {body, categories, slug } = fields;
 
-            if (mtitle === '') { return res.status(400).json({ error: 'MTitle is required' }) }
-            if (title === '') { return res.status(400).json({ error: 'title is required' }) }
-            if (mdesc === '') { return res.status(400).json({ error: 'Mdesc is required' }) }
             if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
 
             const strippedContent = striptags(body);
