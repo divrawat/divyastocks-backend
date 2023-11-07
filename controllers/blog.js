@@ -1,12 +1,12 @@
-import Blog from "../models/blog.js"
-import _ from "lodash"
-import formidable from "formidable"
-import { errorHandler } from "../helpers/dbErrorHandler.js"
-import slugify from "slugify"
-import User from "../models/user.js"
+import Blog from "../models/blog.js";
+import _ from "lodash";
+import formidable from "formidable";
+import { errorHandler } from "../helpers/dbErrorHandler.js";
+import slugify from "slugify";
+import User from "../models/user.js";
 import striptags from 'striptags';
 import "dotenv/config.js";
-
+import { format } from 'date-fns';
 
 export const create = async (req, res) => {
     try {
@@ -28,7 +28,10 @@ export const create = async (req, res) => {
             blog.slug = slugify(slug).toLowerCase();
             blog.mtitle = mtitle;
             blog.mdesc = mdesc;
-            blog.date = date;
+            const mydate = new Date(date);
+            const formattedDate = format(mydate, 'dd MMM, yyyy');
+            console.log(formattedDate);
+            blog.date = formattedDate;
             blog.photo = photo;
             blog.excerpt = excerpt0;
             blog.postedBy = req.auth._id;
@@ -59,9 +62,16 @@ export const update = async (req, res) => {
 
             _.merge(oldBlog, fields);
 
-            const {body, categories, slug } = fields;
+            const {body, categories, slug, date } = fields;
 
             if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
+
+            if (date){
+                const mydate = new Date(date);
+                const formattedDate = format(mydate, 'dd MMM, yyyy');
+                console.log(formattedDate);
+                oldBlog.date=formattedDate;
+            }
 
             const strippedContent = striptags(body);
             const excerpt = strippedContent.slice(0, 150);
