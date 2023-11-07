@@ -66,7 +66,7 @@ export const update = async (req, res) => {
 
             _.merge(oldBlog, fields);
 
-            const { title, mtitle, mdesc, body, categories } = fields;
+            const { title, mtitle, mdesc, body, categories, slug } = fields;
 
             if (mtitle === '') { return res.status(400).json({ error: 'MTitle is required' }) }
             if (title === '') { return res.status(400).json({ error: 'title is required' }) }
@@ -86,10 +86,7 @@ export const update = async (req, res) => {
 
         });
     } catch (error) { return res.status(500).json({ error: 'Internal Server Error' }) }
-
 };
-
-
 
 
 export const remove = async (req, res) => {
@@ -105,12 +102,31 @@ export const remove = async (req, res) => {
 
 
 
+export const relatedposts = async (req, res) => {
+    try {
+      const slug = req.params.slug.toLowerCase();
+      const blogpost = await Blog.findOne({ slug }).exec();
+      if (!blogpost) {return res.status(404).json({ error: 'Blog not found' });}
+        
+      const categories = blogpost.categories;
+  
+      const data = await Blog.find({ _id: { $ne: blogpost._id },categories: { $in: categories }, })
+        .populate('postedBy', '_id name username profile').select('title slug postedBy date photo').limit(6);
+        
+      res.status(200).json(data);
+    } catch (err) { res.status(500).json({ error: "Something Went Wrong" });}
+  };
+
+
 export const allblogs = async (req, res) => {
     try {
-        const data = await Blog.find({}).sort({ date: -1 }).select('_id slug date').exec();    
+        const data = await Blog.find({}).sort({ date: -1 }).select('_id slug date').exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
+
+
+
 
 export const allblogslugs = async (req, res) => {
     try {
@@ -119,27 +135,36 @@ export const allblogslugs = async (req, res) => {
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
 
+
+
+
 export const feeds = async (req, res) => {
     try {
         const data = await Blog.find({}).sort({ date: -1 })
-            .populate('postedBy', '_id name username').select('_id title excerpt mdesc slug date body postedBy').limit(7) .exec();    
+            .populate('postedBy', '_id name username').select('_id title excerpt mdesc slug date body postedBy').limit(7).exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
 
+
+
+
 export const list = async (req, res) => {
     try {
         const data = await Blog.find({})
-            .populate('postedBy', '_id name username').sort({ date: -1 }).select('_id title slug categories tags date postedBy').exec();  
+            .populate('postedBy', '_id name username').sort({ date: -1 }).select('_id title slug categories tags date postedBy').exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
+
+
+
 
 export const listAllBlogsCategoriesTags = async (req, res) => {
     try {
         const blogs = await Blog.find({}).sort({ date: -1 })
             .populate('categories', '_id name slug').populate('tags', '_id name slug')
-            .populate('postedBy', '_id name username profile').select('_id title photo slug excerpt categories date tags postedBy') .exec();
+            .populate('postedBy', '_id name username profile').select('_id title photo slug excerpt categories date tags postedBy').exec();
         res.json({ blogs, size: blogs.length });
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -151,20 +176,9 @@ export const read = async (req, res) => {
         const slug = req.params.slug.toLowerCase();
         const data = await Blog.findOne({ slug })
             .populate('categories', '_id name slug').populate('tags', '_id name slug').populate('postedBy', '_id name username')
-            .select('_id photo title body slug mtitle mdesc date categories tags postedBy') .exec();
+            .select('_id photo title body slug mtitle mdesc date categories tags postedBy').exec();
         if (!data) { return res.status(404).json({ error: 'Blogs not found' }); }
         res.json(data);
-    } catch (err) { res.json({ error: errorHandler(err) }); }
-};
-
-
-
-export const listRelated = async (req, res) => {
-    try {
-        const { _id, categories } = req.body.blog;
-        const blogs = await Blog.find({ _id: { $ne: _id }, categories: { $in: categories } })
-            .limit(6).populate('postedBy', '_id name username').select('title slug date photo postedBy').exec();
-        res.json(blogs);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
 
@@ -176,7 +190,8 @@ export const listSearch = async (req, res) => {
         Blog.find({
             $or: [
                 { title: { $regex: search, $options: 'i' } },
-                { body: { $regex: search, $options: 'i' }
+                {
+                    body: { $regex: search, $options: 'i' }
                 }
             ]
         }).select('-photo -body').exec((err, blogs) => {
