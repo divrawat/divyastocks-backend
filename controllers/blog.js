@@ -35,8 +35,8 @@ export const create = async (req, res) => {
             await blog.save();
             const updatedBlog = await Blog.findByIdAndUpdate(blog._id, { $push: {categories: { $each: arrayOfCategories },tags: { $each: arrayOfTags }
               } }, { new: true }).exec();
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
+             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
+             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
             res.json(updatedBlog);
         });
     } catch (error) { res.status(400).json({ "Error": "Something Went Wrong" }) }
@@ -73,8 +73,8 @@ export const update = async (req, res) => {
             const result = await oldBlog.save();
             res.json(result);
 
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${result.slug}`, { method: 'POST' });
-            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
+             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${result.slug}`, { method: 'POST' });
+             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
 
         });
     } catch (error) { return res.status(500).json({ error: 'Internal Server Error' }) }
