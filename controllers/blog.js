@@ -6,7 +6,6 @@ import slugify from "slugify";
 import User from "../models/user.js";
 import striptags from 'striptags';
 import "dotenv/config.js";
-import { format } from 'date-fns';
 
 export const create = async (req, res) => {
     try {
@@ -16,27 +15,26 @@ export const create = async (req, res) => {
         form.parse(req, async (err, fields) => {
             if (err) { return res.status(400).json({ error: 'Image could not upload' }); }
 
-            const { title, body, slug, mtitle, mdesc, date, categories, photo } = fields;
+            const { title, body, slug, mtitle, mdesc, date, categories, tags, photo } = fields;
             if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
 
             let blog = new Blog();
             let strippedContent = striptags(body);
             let excerpt0 = strippedContent.slice(0, 150);
             let arrayOfCategories = categories && categories.split(',');
+            let arrayOfTags = tags && tags.split(',');
             blog.title = title;
             blog.body = body;
             blog.slug = slugify(slug).toLowerCase();
             blog.mtitle = mtitle;
             blog.mdesc = mdesc;
-            const mydate = new Date(date);
-            const formattedDate = format(mydate, 'dd MMM, yyyy');
-            console.log(formattedDate);
-            blog.date = formattedDate;
+            blog.date = date;
             blog.photo = photo;
             blog.excerpt = excerpt0;
             blog.postedBy = req.auth._id;
             await blog.save();
-            const updatedBlog = await Blog.findByIdAndUpdate(blog._id, { $push: { categories: arrayOfCategories } }, { new: true }).exec();
+            const updatedBlog = await Blog.findByIdAndUpdate(blog._id, { $push: {categories: { $each: arrayOfCategories },tags: { $each: arrayOfTags }
+              } }, { new: true }).exec();
             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
             await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
             res.json(updatedBlog);
@@ -57,26 +55,20 @@ export const update = async (req, res) => {
         const form = new formidable.IncomingForm();
         form.keepExtensions = true;
 
-        form.parse(req, async (err, fields, files) => {
+        form.parse(req, async (err, fields) => {
             if (err) { return res.status(400).json({ error: 'Image could not upload' }); }
 
             _.merge(oldBlog, fields);
 
-            const {body, categories, slug, date } = fields;
+            const {body, categories, slug, tags } = fields;
 
             if (slug) { oldBlog.slug = slugify(slug).toLowerCase(); }
-
-            if (date){
-                const mydate = new Date(date);
-                const formattedDate = format(mydate, 'dd MMM, yyyy');
-                console.log(formattedDate);
-                oldBlog.date=formattedDate;
-            }
 
             const strippedContent = striptags(body);
             const excerpt = strippedContent.slice(0, 150);
             if (body) { oldBlog.excerpt = excerpt; }
             if (categories) { oldBlog.categories = categories.split(',').map(category => category.trim()) }
+            if (categories) { oldBlog.tags = tags.split(',').map(tag => tag.trim()) }
 
             const result = await oldBlog.save();
             res.json(result);
