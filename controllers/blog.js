@@ -25,6 +25,7 @@ export const create = async (req, res) => {
       blog.photo = photo;
       blog.date = date;
       blog.body = body;
+      blog.postedBy = req.auth._id;
       let strippedContent = striptags(body);
       let excerpt0 = strippedContent.slice(0, 150);
       blog.excerpt = excerpt0;
