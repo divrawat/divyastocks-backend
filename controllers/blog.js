@@ -18,7 +18,7 @@ export const create = async (req, res) => {
   
       let blog = new Blog();
       blog.title = title;
-      blog.slug = slugify(slug);
+      blog.slug = slugify(slug).toLowerCase();
       blog.description = description;
       blog.mtitle = mtitle;
       blog.mdesc = mdesc;
@@ -49,10 +49,9 @@ export const update = async (req, res) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
   
       const updateFields = req.body;
-      console.log(updateFields);
   
       try {
-        const slug = req.params.slug;
+        const slug = req.params.slug.toLowerCase();
         if (!slug) { return res.status(404).json({ error: 'Blog not found' }) }
   
         let blog = await Blog.findOne({ slug }).exec();
@@ -67,7 +66,7 @@ export const update = async (req, res) => {
           else if (key === 'categories') { blog.categories = updateFields.categories.split(',').map(category => category.trim()); }
           else if (key === 'tags') { blog.tags = updateFields.tags.split(',').map(tag => tag.trim()); }
           else if (key === 'excerpt') { blog.excerpt = updateFields.strippedContent.slice(0, 150);} 
-          else if (key === 'slug') { blog.slug = slugify(updateFields.slug) }
+          else if (key === 'slug') { blog.slug = slugify(updateFields.slug).toLowerCase(); }
           else if (key === 'photo') { blog.photo = updateFields.photo; }
         });
         const savedBlog = await blog.save();
