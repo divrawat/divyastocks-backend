@@ -64,16 +64,8 @@ export const update = (req, res) => {
         user = _.merge(user, fields);
 
 
-
-
         user.role = existingRole;
         user.email = existingEmail;
-
-
-
-
-
-
 
         const {password} = fields;
         function validatePassword(password) {
@@ -101,13 +93,6 @@ export const update = (req, res) => {
                 error: 'Password should contain at least 1 lowercase, 1 uppercase, 1 numeric, 1 special character and must be 8 characters or longer.'
             });
         }
-
-
-
-
-
-
-
 
 
         if (files.photo) {

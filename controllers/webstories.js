@@ -8,7 +8,6 @@ export const createWebStory = async (req, res) => {
 
   upload.none()(req, res, async (err) => {
     if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-
     const { title, description, slug, coverphoto, slides, link, lastimage, lastheading, ads } = req.body;
 
     if (!title || title.length > 69) { return res.status(400).json({ error: 'Title is required, less than 200 characters' }) }
@@ -37,8 +36,6 @@ export const createWebStory = async (req, res) => {
       return res.status(201).json(savedStory);
     } catch (error) { return res.status(500).json({ error: "Slug should be unique" }) }
   });
-
-
 };
 
 
