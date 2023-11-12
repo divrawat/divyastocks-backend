@@ -6,11 +6,13 @@ import striptags from 'striptags';
 import "dotenv/config.js";
 import multer from 'multer';
 const upload = multer({});
+// import moment from "moment-timezone"
 
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
       const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+      
   
       if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
       if (!tags || tags.length === 0) { return res.status(400).json({ error: 'At least one Tag is required' }) }
@@ -46,33 +48,33 @@ export const update = async (req, res) => {
 
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-  
-      const updateFields = req.body;
+
+      const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
   
       try {
         const slug = req.params.slug.toLowerCase();
         if (!slug) { return res.status(404).json({ error: 'Blog not found' }) }
   
         let blog = await Blog.findOne({ slug }).exec();
-  
+
         Object.keys(updateFields).forEach((key) => {
-          if (key === 'title') { blog.title = updateFields.title; }
-          else if (key === 'description') { blog.description = updateFields.description; }
-          else if (key === 'mtitle') { blog.mtitle = updateFields.mtitle; }
-          else if (key === 'mdesc') { blog.mdesc = updateFields.mdesc; }
-          else if (key === 'date') { blog.date = updateFields.date; }
-          else if (key === 'body') { blog.body = updateFields.body; }
-          else if (key === 'categories') { blog.categories = updateFields.categories.split(',').map(category => category.trim()); }
-          else if (key === 'tags') { blog.tags = updateFields.tags.split(',').map(tag => tag.trim()); }
-          else if (key === 'excerpt') { blog.excerpt = updateFields.strippedContent.slice(0, 150);} 
-          else if (key === 'slug') { blog.slug = slugify(updateFields.slug).toLowerCase(); }
-          else if (key === 'photo') { blog.photo = updateFields.photo; }
+            
+          if (key === 'title') { blog.title = title; }
+          else if (key === 'description') { blog.description = description; }
+          else if (key === 'mtitle') { blog.mtitle = mtitle; }
+          else if (key === 'mdesc') { blog.mdesc = mdesc; }
+          else if (key === 'date') { date }
+          else if (key === 'body') { blog.body = body; }
+          else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
+          else if (key === 'tags') { blog.tags = tags.split(',').map(tag => tag.trim()); }
+          else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150);} 
+          else if (key === 'slug') { blog.slug = slugify(slug).toLowerCase(); }
+          else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
 
-         fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
+        await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
-         
         return res.status(200).json(savedBlog);
       } catch (error) {
         console.error("Error updating Blog:", error);
