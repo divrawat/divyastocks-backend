@@ -60,7 +60,7 @@ export const remove = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
     const cacheKey = `tag_${slug}`;
     try {
-        const data = await Tag.findOneAndRemove({ slug }).exec();
+        const data = await Tag.findOneAndDelete({ slug }).exec();
         if (!data) { return res.status(400).json({ error: 'Tag not found' }); }
         myCache.del(cacheKey);
         myCache.del("tagslist");

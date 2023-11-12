@@ -72,7 +72,10 @@ export const update = async (req, res) => {
           else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
+        
+        const cacheKey = `blog_${slug}`;
         cache.del(cacheKey);
+        
 
         await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
@@ -89,7 +92,7 @@ export const update = async (req, res) => {
 export const remove = async (req, res) => {
     try {
         const slug = req.params.slug.toLowerCase();
-        const data = await Blog.findOneAndRemove({ slug }).exec();
+        const data = await Blog.findOneAndDelete({ slug }).exec();
         if (!data) { return res.json({ error: 'Blog not found' }); }
         res.json({ message: 'Blog deleted successfully' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${slug}`, { method: 'POST' });

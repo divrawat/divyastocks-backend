@@ -59,7 +59,7 @@ export const remove = async (req, res) => {
     const cacheKey = `category_${slug}`;
 
     try {
-        const data = await Category.findOneAndRemove({ slug }).exec();
+        const data = await Category.findOneAndDelete({ slug }).exec();
         if (!data) {  return res.status(400).json({error: 'Category not found' }); }
         myCache.del(cacheKey);
         myCache.del("categorieslist");
