@@ -49,7 +49,7 @@ export const update = async (req, res) => {
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
 
-      const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+      
   
       try {
         const slug = req.params.slug.toLowerCase();
@@ -57,18 +57,20 @@ export const update = async (req, res) => {
   
         let blog = await Blog.findOne({ slug }).exec();
 
+        const { title, description, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+
         Object.keys(updateFields).forEach((key) => {
-            
+
           if (key === 'title') { blog.title = title; }
           else if (key === 'description') { blog.description = description; }
           else if (key === 'mtitle') { blog.mtitle = mtitle; }
           else if (key === 'mdesc') { blog.mdesc = mdesc; }
-          else if (key === 'date') { date }
+          else if (key === 'date') { blog.date = date }
           else if (key === 'body') { blog.body = body; }
           else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
           else if (key === 'tags') { blog.tags = tags.split(',').map(tag => tag.trim()); }
           else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150);} 
-          else if (key === 'slug') { blog.slug = slugify(slug).toLowerCase(); }
+          else if (key === 'slug') { blog.slug = slugify(req.body.slug).toLowerCase(); }
           else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
