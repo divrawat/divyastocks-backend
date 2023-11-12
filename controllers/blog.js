@@ -6,13 +6,13 @@ import striptags from 'striptags';
 import "dotenv/config.js";
 import multer from 'multer';
 const upload = multer({});
-// import moment from "moment-timezone"
+import NodeCache from 'node-cache';
+const cache = new NodeCache();
 
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
       const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
-      
   
       if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
       if (!tags || tags.length === 0) { return res.status(400).json({ error: 'At least one Tag is required' }) }
@@ -48,9 +48,6 @@ export const update = async (req, res) => {
 
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-
-      
-  
       try {
         const slug = req.params.slug.toLowerCase();
         if (!slug) { return res.status(404).json({ error: 'Blog not found' }) }
@@ -75,6 +72,7 @@ export const update = async (req, res) => {
           else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
+        cache.del(cacheKey);
 
         await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
@@ -172,10 +170,17 @@ export const listAllBlogsCategoriesTags = async (req, res) => {
 export const read = async (req, res) => {
     try {
         const slug = req.params.slug.toLowerCase();
+        const cacheKey = `blog_${slug}`;
+        const cachedData = cache.get(cacheKey);
+        if (cachedData) {return res.json(cachedData);}
+
         const data = await Blog.findOne({ slug })
             .populate('categories', '_id name slug').populate('tags', '_id name slug').populate('postedBy', '_id name username')
             .select('_id photo title body slug mtitle mdesc date categories tags postedBy').exec();
         if (!data) { return res.status(404).json({ error: 'Blogs not found' }); }
+
+        cache.set(cacheKey, data, 3000);
+
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };

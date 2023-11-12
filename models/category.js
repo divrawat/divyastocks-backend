@@ -18,7 +18,6 @@ const categorySchema = new mongoose.Schema(
             index: true
         }
     },
-    // { timestamp: true }
 );
 
 export default mongoose.model('Category', categorySchema);
