@@ -58,8 +58,9 @@ export const update = async (req, res) => {
         let blog = await Blog.findOne({ slug }).exec();
 
         const { title, description, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+        const updatefields=req.body;
 
-        Object.keys(updateFields).forEach((key) => {
+        Object.keys(updatefields).forEach((key) => {
 
           if (key === 'title') { blog.title = title; }
           else if (key === 'description') { blog.description = description; }
@@ -70,7 +71,7 @@ export const update = async (req, res) => {
           else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
           else if (key === 'tags') { blog.tags = tags.split(',').map(tag => tag.trim()); }
           else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150);} 
-          else if (key === 'slug') { blog.slug = slugify(req.body.slug).toLowerCase(); }
+          else if (key === 'slug') { blog.slug = slugify(updatefields.slug).toLowerCase(); }
           else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
