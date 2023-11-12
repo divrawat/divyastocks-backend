@@ -7,7 +7,6 @@ import "dotenv/config.js";
 import multer from 'multer';
 const upload = multer({});
 
-
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
@@ -73,6 +72,7 @@ export const update = async (req, res) => {
 
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
          fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
+         
         return res.status(200).json(savedBlog);
       } catch (error) {
         console.error("Error updating Blog:", error);

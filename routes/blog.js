@@ -15,7 +15,6 @@ router.patch('/blog/:slug', requireSignin, adminMiddleware, update);
 router.get('/blog/related/:slug', relatedposts);
 router.get('/allblogslugs', allblogslugs);
 
-
 router.get('/:username/userblogs', list2);
 router.post('/user/blog', requireSignin, authMiddleware, create);
 router.get('/:username/blogs', listByUser);

@@ -124,8 +124,8 @@ export const updateStory = async (req, res) => {
         else if (key === 'lastheading') { story.lastheading = updateFields.lastheading; }
       });
       const savedStory = await story.save();
-      fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
-      fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories`, { method: 'POST' })
+     await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
+     fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories`, { method: 'POST' })
       return res.status(200).json(savedStory);
     } catch (error) {
       console.error("Error updating web story:", error);
