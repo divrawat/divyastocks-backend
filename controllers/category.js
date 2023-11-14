@@ -11,6 +11,7 @@ export const create = async (req, res) => {
     try {
         const category = new Category({ name, description, slug });
         const data = await category.save();
+        myCache.del("categorieslist");
         res.json(data);
     } catch (err) {res.status(400).json({ error: errorHandler(err)});}  
 };
