@@ -120,7 +120,7 @@ export const relatedposts = async (req, res) => {
 
 export const allblogs = async (req, res) => {
     try {
-        const data = await Blog.find({}).sort({ date: -1 }).select('_id slug date').exec();
+        const data = await Blog.find({}).sort({ date: -1 }).select('-_id slug date').exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -130,7 +130,7 @@ export const allblogs = async (req, res) => {
 
 export const allblogslugs = async (req, res) => {
     try {
-        const data = await Blog.find({}).select('slug').exec();
+        const data = await Blog.find({}).select('-_id slug').exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -141,7 +141,7 @@ export const allblogslugs = async (req, res) => {
 export const feeds = async (req, res) => {
     try {
         const data = await Blog.find({}).sort({ date: -1 })
-            .populate('postedBy', '_id name username').select('_id title excerpt mdesc slug date body postedBy').limit(7).exec();
+            .populate('postedBy', '-_id name username').select('-_id title excerpt mdesc slug date body postedBy').limit(7).exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -154,7 +154,7 @@ export const list = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const perPage = 10;
         const skip = (page - 1) * perPage;
-        const data = await Blog.find({}).populate('postedBy', '_id name username').sort({ date: -1 }).select('_id title slug date postedBy').skip(skip).limit(perPage).exec();
+        const data = await Blog.find({}).populate('postedBy', '-_id name username').sort({ date: -1 }).select('-_id title slug date postedBy').skip(skip).limit(perPage).exec();
         res.json({totalBlogs: totalCount , data }); 
     } catch (err) { console.error('Error fetching Blogs:', err); res.status(500).json({ error: 'Internal Server Error' }); }  
 };
@@ -162,8 +162,8 @@ export const list = async (req, res) => {
 export const listAllBlogsCategoriesTags = async (req, res) => {
     try {
         const blogs = await Blog.find({}).sort({ date: -1 })
-            .populate('categories', '_id name slug').populate('tags', '_id name slug')
-            .populate('postedBy', '_id name username profile').select('_id title photo slug excerpt categories date tags postedBy').exec();
+            .populate('categories', '-_id name slug').populate('tags', '-_id name slug')
+            .populate('postedBy', '-_id name username profile').select('-_id title photo slug excerpt categories date tags postedBy').exec();
         res.json({ blogs, size: blogs.length });
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -178,8 +178,8 @@ export const read = async (req, res) => {
         if (cachedData) {return res.json(cachedData);}
 
         const data = await Blog.findOne({ slug })
-            .populate('categories', '_id name slug').populate('tags', '_id name slug').populate('postedBy', '_id name username')
-            .select('_id photo title body slug mtitle mdesc date categories tags postedBy').exec();
+            .populate('categories', '-_id name slug').populate('tags', '-_id name slug').populate('postedBy', '-_id name username')
+            .select('-_id photo title body slug mtitle mdesc date categories tags postedBy').exec();
         if (!data) { return res.status(404).json({ error: 'Blogs not found' }); }
 
         cache.set(cacheKey, data, 3000);
@@ -218,7 +218,7 @@ export const listByUser = async (req, res) => {
         const user = await User.findOne({ username: req.params.username }).exec();
         if (!user) { return res.status(400).json({ error: 'User not found' }); }
         const userId = user._id;
-        const data = await Blog.find({ postedBy: userId }).populate('postedBy', '_id name').select('_id title date postedBy slug').exec();
+        const data = await Blog.find({ postedBy: userId }).populate('postedBy', '-_id name').select('-_id title date postedBy slug').exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
@@ -235,7 +235,7 @@ export const list2 = async (req, res) => {
         const perPage = 10;
         const skip = (page - 1) * perPage;
 
-        const data = await Blog.find({ postedBy: userId }).populate('postedBy', '_id name username').sort({ date: -1 }).select('_id title slug date postedBy').skip(skip).limit(perPage).exec();
+        const data = await Blog.find({ postedBy: userId }).populate('postedBy', '-_id name username').sort({ date: -1 }).select('-_id title slug date postedBy').skip(skip).limit(perPage).exec();
 
         const totalCount = await Blog.countDocuments({postedBy: userId}).exec();
         res.json({totalBlogs: totalCount , data }); 

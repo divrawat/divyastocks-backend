@@ -55,7 +55,7 @@ export const fetchWebStoryBySlug = async (req, res) => {
 
 export const allstories = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('title slug date coverphoto description').limit(12).exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id title slug date coverphoto description').limit(12).exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };
@@ -63,7 +63,7 @@ export const allstories = async (req, res) => {
 
 export const allslugs = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('slug').exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id slug').exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };
@@ -71,7 +71,7 @@ export const allslugs = async (req, res) => {
 
 export const sitemap = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('title slug date coverphoto').exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id title slug date coverphoto').exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };

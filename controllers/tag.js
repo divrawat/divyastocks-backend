@@ -42,10 +42,10 @@ export const read = async (req, res) => {
         if (!tag) { return res.status(400).json({ error: 'Tag not found' }); }
 
         const blogs = await Blog.find({ tags: tag })
-            .populate('categories', '_id name slug')
-            .populate('tags', '_id name slug')
-            .populate('postedBy', '_id name username')
-            .select('_id title photo slug excerpt categories date postedBy tags')
+            .populate('categories', '-_id name slug')
+            .populate('tags', '-_id name slug')
+            .populate('postedBy', '-_id name username')
+            .select('-_id title photo slug excerpt categories date postedBy tags')
             .exec();
 
             myCache.set(cacheKey, { tag, blogs }, 3000);
