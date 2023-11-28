@@ -23,7 +23,7 @@ export const list = async (req, res) => {
     if (cachedData) {return res.json(cachedData);}
         
     try {
-        const data = await Tag.find({}).exec();
+        const data = await Tag.find({}).select('-_id name description slug').exec();
         myCache.set("tagslist", data, 3000);
         res.json(data);
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }

@@ -21,7 +21,7 @@ export const list = async (req, res) => {
     const cachedData = myCache.get("categorieslist");
     if (cachedData) {return res.json(cachedData);}
     try {
-        const data = await Category.find({}).exec();
+        const data = await Category.find({}).select('-_id name description slug').exec();
         myCache.set("categorieslist", data, 3000);
         res.json(data);
     } catch (err) {res.status(400).json({error: errorHandler(err)});}  
