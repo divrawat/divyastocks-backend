@@ -36,7 +36,7 @@ export const read = async (req, res) => {
     if (cachedData) {return res.json(cachedData);}
         
     try {
-        const category = await Category.findOne({ slug }).exec();
+        const category = await Category.findOne({ slug }).select('_id name slug').exec();
         if (!category) {return res.status(400).json({ error: 'Category not found' });}
 
         const blogs = await Blog.find({ categories: category })

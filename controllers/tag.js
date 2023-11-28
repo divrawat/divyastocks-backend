@@ -38,7 +38,7 @@ export const read = async (req, res) => {
     if (cachedData) {return res.json(cachedData);}
 
     try {
-        const tag = await Tag.findOne({ slug }).exec();
+        const tag = await Tag.findOne({ slug }).select('-_id name slug').exec();
         if (!tag) { return res.status(400).json({ error: 'Tag not found' }); }
 
         const blogs = await Blog.find({ tags: tag })
