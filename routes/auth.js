@@ -31,7 +31,7 @@ router.get('/signout', signout);
 router.put('/forgot-password', forgotPasswordValidator, runvalidation, forgotPassword);
 router.put('/reset-password', resetPasswordValidator, runvalidation, resetPassword);
 
-
+// router.post('/google-login', googleLogin);
 
 
 export default router
