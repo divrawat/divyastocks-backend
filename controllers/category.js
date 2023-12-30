@@ -21,7 +21,7 @@ export const list = async (req, res) => {
     // const cachedData = myCache.get("categorieslist");
     // if (cachedData) {return res.json(cachedData);}
     try {
-        const data = await Category.find({}).select('-_id name description slug').exec();
+        const data = await Category.find({}).select('_id name description slug').exec();
         // myCache.set("categorieslist", data, 3000);
         res.json(data);
     } catch (err) {res.status(400).json({error: errorHandler(err)});}  
@@ -41,8 +41,8 @@ export const read = async (req, res) => {
 
         const blogs = await Blog.find({ categories: category })
             .populate('categories', '-_id name slug')
-            .populate('tags', '-_id name slug')
-            .populate('postedBy', '-_id name username')
+            .populate('tags', '_id name slug')
+            .populate('postedBy', '_id name username')
             .select('-_id title photo slug excerpt categories date postedBy tags')
             .exec();
             //  myCache.set(cacheKey, { category, blogs }, 3000);

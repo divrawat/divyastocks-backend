@@ -23,7 +23,7 @@ export const list = async (req, res) => {
     // if (cachedData) {return res.json(cachedData);}
         
     try {
-        const data = await Tag.find({}).select('-_id name description slug').exec();
+        const data = await Tag.find({}).select('_id name description slug').exec();
         // myCache.set("tagslist", data, 3000);
         res.json(data);
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
@@ -38,12 +38,12 @@ export const read = async (req, res) => {
     // if (cachedData) {return res.json(cachedData);}
 
     try {
-        const tag = await Tag.findOne({ slug }).select('-_id name slug').exec();
+        const tag = await Tag.findOne({ slug }).select('_id name slug').exec();
         if (!tag) { return res.status(400).json({ error: 'Tag not found' }); }
 
         const blogs = await Blog.find({ tags: tag })
-            .populate('categories', '-_id name slug')
-            .populate('tags', '-_id name slug')
+            .populate('categories', '_id name slug')
+            .populate('tags', '_id name slug')
             .populate('postedBy', '-_id name username')
             .select('-_id title photo slug excerpt categories date postedBy tags')
             .exec();
