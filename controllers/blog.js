@@ -6,8 +6,6 @@ import striptags from 'striptags';
 import "dotenv/config.js";
 import multer from 'multer';
 const upload = multer({});
-import NodeCache from 'node-cache';
-const cache = new NodeCache();
 
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
@@ -72,9 +70,6 @@ export const update = async (req, res) => {
           else if (key === 'photo') { blog.photo = photo; }
         });
         const savedBlog = await blog.save();
-        
-        const cacheKey = `blog_${slug}`;
-        cache.del(cacheKey);
         
 
         await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
@@ -173,16 +168,12 @@ export const listAllBlogsCategoriesTags = async (req, res) => {
 export const read = async (req, res) => {
     try {
         const slug = req.params.slug.toLowerCase();
-        const cacheKey = `blog_${slug}`;
-        const cachedData = cache.get(cacheKey);
-        if (cachedData) {return res.json(cachedData);}
 
         const data = await Blog.findOne({ slug })
             .populate('categories', '-_id name slug').populate('tags', '-_id name slug').populate('postedBy', '-_id name username')
             .select('-_id photo title body slug mtitle mdesc date categories tags postedBy').exec();
         if (!data) { return res.status(404).json({ error: 'Blogs not found' }); }
 
-        cache.set(cacheKey, data, 3000);
 
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }

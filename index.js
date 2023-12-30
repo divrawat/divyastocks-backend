@@ -96,8 +96,12 @@ passport.deserializeUser((user,done)=>{ done(null,user); });
 app.get("/auth/google",passport.authenticate("google",{scope:["profile","email"]}));
 
 app.get("/auth/google/callback", passport.authenticate("google",{
-    successRedirect:"http://localhost:3000",
-    failureRedirect:"http://localhost:3000/signin"
+     successRedirect:"http://localhost:3000",
+     failureRedirect:"http://localhost:3000/signin"
+    // successRedirect:"https://coding4u-project.vercel.app",
+    // failureRedirect:"https://coding4u-project.vercel.app/signin"
+
+    
 }))
 
 

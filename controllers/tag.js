@@ -2,8 +2,8 @@ import Tag from '../models/tag.js';
 import slugify from "slugify";
 import { errorHandler } from "../helpers/dbErrorHandler.js";
 import Blog from "../models/blog.js"
-import NodeCache from "node-cache"
-const myCache = new NodeCache();
+// import NodeCache from "node-cache"
+// const myCache = new NodeCache();
 
 
 export const create = async (req, res) => {
@@ -19,12 +19,12 @@ export const create = async (req, res) => {
 
 export const list = async (req, res) => {
    
-    const cachedData = myCache.get("tagslist");
-    if (cachedData) {return res.json(cachedData);}
+    // const cachedData = myCache.get("tagslist");
+    // if (cachedData) {return res.json(cachedData);}
         
     try {
         const data = await Tag.find({}).select('-_id name description slug').exec();
-        myCache.set("tagslist", data, 3000);
+        // myCache.set("tagslist", data, 3000);
         res.json(data);
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
 };
@@ -32,10 +32,10 @@ export const list = async (req, res) => {
 
 export const read = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
-    const cacheKey = `tag_${slug}`;
+    // const cacheKey = `tag_${slug}`;
 
-    const cachedData = myCache.get(cacheKey);
-    if (cachedData) {return res.json(cachedData);}
+    // const cachedData = myCache.get(cacheKey);
+    // if (cachedData) {return res.json(cachedData);}
 
     try {
         const tag = await Tag.findOne({ slug }).select('-_id name slug').exec();
@@ -48,7 +48,7 @@ export const read = async (req, res) => {
             .select('-_id title photo slug excerpt categories date postedBy tags')
             .exec();
 
-            myCache.set(cacheKey, { tag, blogs }, 3000);
+            // myCache.set(cacheKey, { tag, blogs }, 3000);
 
         res.json({ tag, blogs });
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
@@ -58,12 +58,12 @@ export const read = async (req, res) => {
 
 export const remove = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
-    const cacheKey = `tag_${slug}`;
+    // const cacheKey = `tag_${slug}`;
     try {
         const data = await Tag.findOneAndDelete({ slug }).exec();
         if (!data) { return res.status(400).json({ error: 'Tag not found' }); }
-        myCache.del(cacheKey);
-        myCache.del("tagslist");
+        // myCache.del(cacheKey);
+        // myCache.del("tagslist");
         res.json({ message: 'Tag deleted successfully' });
     } catch (err) {res.status(400).json({error: errorHandler(err)}); } 
 };
