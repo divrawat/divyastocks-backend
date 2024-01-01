@@ -84,14 +84,14 @@ passport.deserializeUser((user, done) => { done(null, user); });
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-/*
+
  app.get("/auth/google/callback", passport.authenticate("google", {
    successRedirect: `${FRONTEND}`,
    failureRedirect: `${FRONTEND}/signin`
  }))
- */
+ 
 
-
+/*
 app.get("/auth/google/callback", (req, res, next) => {
   passport.authenticate("google", (err, user) => {
     if (err || !user) {
@@ -109,7 +109,7 @@ app.get("/auth/google/callback", (req, res, next) => {
     });
   })(req, res, next);
 });
-
+*/
 
 
 app.get("/login/success", async (req, res) => {
