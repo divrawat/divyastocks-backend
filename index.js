@@ -52,7 +52,9 @@ app.listen(port, () => { console.log(`Server is running on port ${port}`); });
 app.use(session({
   secret: clientsecret,
   resave: false,
-  saveUninitialized: true
+  saveUninitialized: true,
+  cookie: { secure: true },
+
 }))
 
 app.use(passport.initialize());
