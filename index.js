@@ -82,25 +82,31 @@ passport.deserializeUser((user, done) => { done(null, user); });
 
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
+/*
  app.get("/auth/google/callback", passport.authenticate("google", {
    successRedirect: `${FRONTEND}`,
    failureRedirect: `${FRONTEND}/signin`
  }))
+ */
 
-/*
+
 app.get("/auth/google/callback", (req, res, next) => {
-  passport.authenticate("google", { session: false }, (err, user) => {
+  passport.authenticate("google", (err, user) => {
     if (err || !user) {
       return res.redirect(`${FRONTEND}/signin`);
     }
-    if (user.role === 1) {
-      return res.redirect(`${FRONTEND}/admin`);
-    } else {
-      return res.redirect(`${FRONTEND}/user`);
-    }
+    req.login(user, (loginErr) => {
+      if (loginErr) {
+        return res.redirect(`${FRONTEND}/signin`);
+      }
+      if (user.role === 1) {
+        return res.redirect(`${FRONTEND}/admin`);
+      } else {
+        return res.redirect(`${FRONTEND}/user`);
+      }
+    });
   })(req, res, next);
 });
-*/
 
 
 
