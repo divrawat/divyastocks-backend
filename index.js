@@ -25,7 +25,7 @@ import { FRONTEND } from "./config.js";
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000", FRONTEND],
+  origin: ["http://localhost:3000","https://coding4u-project.vercel.app", FRONTEND],
   methods: "GET,POST,PUT,DELETE,PATCH",
   credentials: true
 }));
