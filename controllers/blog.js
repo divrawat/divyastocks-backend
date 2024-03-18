@@ -11,6 +11,7 @@ export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
       if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
       const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+      console.log(req.body);
   
       if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
       if (!tags || tags.length === 0) { return res.status(400).json({ error: 'At least one Tag is required' }) }

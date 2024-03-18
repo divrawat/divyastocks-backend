@@ -25,7 +25,7 @@ import { FRONTEND } from "./config.js";
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000","https://coding4u-project.vercel.app", FRONTEND],
+  origin: ["http://localhost:3000", FRONTEND],
   methods: "GET,POST,PUT,DELETE,PATCH",
   credentials: true
 }));
@@ -114,7 +114,7 @@ app.get("/auth/google/callback", (req, res, next) => {
 
 app.get("/login/success", async (req, res) => {
   if (req.user) {
-    const token = jwt.sign({ _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '10d' });
+    const token = jwt.sign({ _id: req.user._id }, "Div12@", { expiresIn: '10d' });
     res.status(200).json({ user: req.user, token })
   }
   else { res.status(400).json({ message: "Not Authorized" }) }
