@@ -6,10 +6,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import blogRoutes from "./routes/blog.js";
 import authRoutes from "./routes/auth.js";
-import userRoutes from "./routes/user.js";
+// import userRoutes from "./routes/user.js";
 import categoryRoutes from "./routes/category.js";
-import tagRoutes from "./routes/tag.js";
-import formRoutes from "./routes/form.js";
 import ImageRoutes from "./routes/images.js";
 import storyRoutes from "./routes/slides.js";
 import "dotenv/config.js";
@@ -18,14 +16,14 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
 const clientid = process.env.GOOGLE_CLIENT_ID
 const clientsecret = process.env.GOOGLE_CLIENT_SECRET
-import User from "./models/user.js";
+// import User from "./models/user.js";
 import jwt from "jsonwebtoken";
 import { FRONTEND } from "./config.js";
 
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:3000","https://coding4u-project.vercel.app", FRONTEND],
+  origin: ["http://localhost:3000", FRONTEND],
   methods: "GET,POST,PUT,DELETE,PATCH",
   credentials: true
 }));
@@ -38,10 +36,10 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use('/api', blogRoutes);
 app.use('/api', authRoutes);
-app.use('/api', userRoutes);
+// app.use('/api', userRoutes);
 app.use('/api', categoryRoutes);
-app.use('/api', tagRoutes);
-app.use('/api', formRoutes);
+// app.use('/api', tagRoutes);
+// app.use('/api', formRoutes);
 app.use('/api', ImageRoutes);
 app.use('/api', storyRoutes);
 
@@ -114,7 +112,7 @@ app.get("/auth/google/callback", (req, res, next) => {
 
 app.get("/login/success", async (req, res) => {
   if (req.user) {
-    const token = jwt.sign({ _id: req.user._id }, process.env.JWT_SECRET, { expiresIn: '10d' });
+    const token = jwt.sign({ _id: req.user._id }, "Div12@", { expiresIn: '10d' });
     res.status(200).json({ user: req.user, token })
   }
   else { res.status(400).json({ message: "Not Authorized" }) }
