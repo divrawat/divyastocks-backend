@@ -62,7 +62,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    sameSite: 'None', // Cross-site cookie
+    // sameSite: 'None', // Cross-site cookie
     secure: true // Cookie must be sent over HTTPS
   }
 }));
