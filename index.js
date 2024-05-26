@@ -62,8 +62,8 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    // sameSite: 'None', // Cross-site cookie
-    secure: true // Cookie must be sent over HTTPS
+    sameSite: 'None', // Cross-site cookie
+    secure: true
   }
 }));
 
@@ -102,7 +102,7 @@ app.get("/auth/google/callback", passport.authenticate("google", {
 }))
 
 
-
+/*
 app.get("/auth/google/callback", (req, res, next) => {
   passport.authenticate("google", (err, user) => {
     if (err || !user) {
@@ -120,11 +120,12 @@ app.get("/auth/google/callback", (req, res, next) => {
     });
   })(req, res, next);
 });
-
+*/
 
 
 app.get("/login/success", async (req, res) => {
   if (req.user) {
+    console.log(req.user);
     const token = jwt.sign({ _id: req.user._id }, "Div12@", { expiresIn: '10d' });
     res.status(200).json({ user: req.user, token })
   }
