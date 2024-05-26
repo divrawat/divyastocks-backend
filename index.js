@@ -49,23 +49,22 @@ app.get('/', (req, res) => { res.json("Backend index"); });
 const port = process.env.PORT || 8000;
 app.listen(port, () => { console.log(`Server is running on port ${port}`); });
 
-// app.use(session({
-//   secret: clientsecret,
-//   resave: false,
-//   saveUninitialized: true,
-//   // cookie: { secure: true },
-
-// }))
-
 app.use(session({
   secret: clientsecret,
   resave: false,
   saveUninitialized: true,
-  cookie: {
-    sameSite: 'None', // Cross-site cookie
-    secure: true
-  }
-}));
+  cookie: { secure: true },
+}))
+
+// app.use(session({
+//   secret: clientsecret,
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: {
+//     sameSite: 'None', // Cross-site cookie
+//     secure: true
+//   }
+// }));
 
 
 app.use(passport.initialize());
