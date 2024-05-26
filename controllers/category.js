@@ -12,8 +12,7 @@ export const create = async (req, res) => {
         const category = new Category({ name, description, slug });
         const data = await category.save();
         // myCache.del("categorieslist");
-        const message = "Category created successfully";
-        res.json({ data, message }); 
+        res.json(data);
     } catch (err) {res.status(400).json({ error: errorHandler(err)});}  
 };
 
@@ -28,21 +27,27 @@ export const list = async (req, res) => {
     } catch (err) {res.status(400).json({error: errorHandler(err)});}  
 };
 
-// const totalCount = await Category.countDocuments({}).exec();
+
 export const read = async (req, res) => {
     const slug = req.params.slug.toLowerCase();
+    // const cacheKey = `category_${slug}`;
 
+    // const cachedData = myCache.get(cacheKey);
+    // if (cachedData) {return res.json(cachedData);}
         
     try {
-        const category = await Category.findOne({ slug }).select('name slug').exec();
+        const category = await Category.findOne({ slug }).select('_id name slug').exec();
         if (!category) {return res.status(400).json({ error: 'Category not found' });}
-        const totalCount = await Blog.countDocuments({ categories: category }).exec();
 
         const blogs = await Blog.find({ categories: category })
-            .populate('categories', 'name slug')
-            .populate('postedBy', 'name username')
-            .select(' title photo slug excerpt categories date postedBy tags')
-        res.json({ category, blogs, totalCount });
+            .populate('categories', '-_id name slug')
+            .populate('tags', '_id name slug')
+            .populate('postedBy', '_id name username')
+            .select('-_id title photo slug excerpt categories date postedBy tags')
+            .exec();
+            //  myCache.set(cacheKey, { category, blogs }, 3000);
+
+        res.json({ category, blogs });
     } catch (err) {
         res.status(400).json({ error: errorHandler(err) });
     }

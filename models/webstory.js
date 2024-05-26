@@ -10,12 +10,6 @@ const slideSchema = new mongoose.Schema({
   image: {
     type: String,
   },
-  height:{
-    type: String,
-  }, 
-  width:{
-    type: String,
-  }
 });
 
 const webstorySchema = new mongoose.Schema({
@@ -35,6 +29,7 @@ const webstorySchema = new mongoose.Schema({
   },
   coverphoto: {
     type: String,
+    max: 195,
     required: true,
   },
   date: {

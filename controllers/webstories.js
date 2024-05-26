@@ -2,7 +2,6 @@ import WebStory from "../models/webstory.js";
 import slugify from "slugify";
 import moment from "moment-timezone"
 import multer from 'multer';
-import { FRONTEND } from "../config.js";
 const upload = multer({});
 
 export const createWebStory = async (req, res) => {
@@ -11,7 +10,7 @@ export const createWebStory = async (req, res) => {
     if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
     const { title, description, slug, coverphoto, slides, link, lastimage, lastheading, ads } = req.body;
 
-    if (!title || title.length > 69) { return res.status(400).json({ error: 'Title is required, less than 70 characters' }) }
+    if (!title || title.length > 69) { return res.status(400).json({ error: 'Title is required, less than 200 characters' }) }
     if (!description || description.length > 200) { return res.status(400).json({ error: 'Description is required, less than 200 characters' }); }
     if (!slug) { return res.status(400).json({ error: 'Slug is required' }) }
     if (!coverphoto) { return res.status(400).json({ error: 'Cover photo is required' }) }
@@ -32,8 +31,8 @@ export const createWebStory = async (req, res) => {
 
     try {
       const savedStory = await story.save();
-       fetch(`${FRONTEND}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
-       fetch(`${FRONTEND}/api/revalidate?path=/web-stories`, { method: 'POST' })
+      fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
+      fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories`, { method: 'POST' })
       return res.status(201).json(savedStory);
     } catch (error) { return res.status(500).json({ error: "Slug should be unique" }) }
   });
@@ -54,48 +53,17 @@ export const fetchWebStoryBySlug = async (req, res) => {
 };
 
 
-export const allstories0 = async (req, res) => {
+export const allstories = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('title slug date coverphoto description').limit(12).exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id title slug date coverphoto description').limit(12).exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };
 
 
-export const allstories = async (req, res) => {
-  try {
-      const totalCount = await WebStory.countDocuments({}).exec();
-      const page = Number(req.query.page) || 1;
-      const perPage = 10;
-      const { search } = req.query;
-      const query = {$or: [{ title: { $regex: search, $options: 'i' } },]};    
-      
-      const skip = (page - 1) * perPage;
-      const data = await WebStory.find(query).sort({ createdAt: -1 }).skip(skip).limit(perPage).exec();
-      res.json({
-          status: true,
-          message: 'All Web Stories Fetched Successfully',
-          totalBlogs: totalCount , data 
-      });
-  } catch (err) { console.error('Error fetching Stories:', err); res.status(500).json({ error: 'Internal Server Error' }); }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const allslugs = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('slug').exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id slug').exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };
@@ -103,7 +71,7 @@ export const allslugs = async (req, res) => {
 
 export const sitemap = async (req, res) => {
   try {
-    const data = await WebStory.find({}).sort({ date: -1 }).select('title slug date coverphoto').exec();
+    const data = await WebStory.find({}).sort({ date: -1 }).select('-_id title slug date coverphoto').exec();
     res.json(data);
   } catch (err) { return res.json({ error: "Something Went Wrong" }) }
 };
@@ -122,8 +90,8 @@ export const deletestory = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: "Something went wrong" });
   }
-   fetch(`${FRONTEND}/api/revalidate?path=/web-stories/${slug}`, { method: 'POST' })
-   fetch(`${FRONTEND}/api/revalidate?path=/web-stories`, { method: 'POST' })
+  fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories/${slug}`, { method: 'POST' })
+      fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories`, { method: 'POST' })
 };
 
 
@@ -156,8 +124,8 @@ export const updateStory = async (req, res) => {
         else if (key === 'lastheading') { story.lastheading = updateFields.lastheading; }
       });
       const savedStory = await story.save();
-      await fetch(`${FRONTEND}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
-    await  fetch(`${FRONTEND}/api/revalidate?path=/web-stories`, { method: 'POST' })
+     await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories/${story.slug}`, { method: 'POST' })
+     fetch(`${process.env.MAIN_URL}/api/revalidate?path=/web-stories`, { method: 'POST' })
       return res.status(200).json(savedStory);
     } catch (error) {
       console.error("Error updating web story:", error);
