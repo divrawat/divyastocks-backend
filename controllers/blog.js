@@ -9,80 +9,83 @@ const upload = multer({});
 
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
-      if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-      const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
-      console.log(req.body);
-  
-      if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
-      if (!tags || tags.length === 0) { return res.status(400).json({ error: 'At least one Tag is required' }) }
-  
-      let blog = new Blog();
-      blog.title = title;
-      blog.slug = slugify(slug).toLowerCase();
-      blog.description = description;
-      blog.mtitle = mtitle;
-      blog.mdesc = mdesc;
-      blog.photo = photo;
-      blog.date = date;
-      blog.body = body;
-      blog.postedBy = req.auth._id;
-      let strippedContent = striptags(body);
-      let excerpt0 = strippedContent.slice(0, 150);
-      blog.excerpt = excerpt0;
-      try {
-        let arrayOfCategories = categories && categories.split(',');
-        let arrayOfTags = tags && tags.split(',');
-        await blog.save();
-        const updatedBlog = await Blog.findByIdAndUpdate(blog._id, { $push: {categories: { $each: arrayOfCategories },tags: { $each: arrayOfTags }
-        } }, { new: true }).exec();
-        res.json(updatedBlog);
-        fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' })
-        fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' })
-      } catch (error) { return res.status(500).json({ error: "Slug should be unique" }) }
+        if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
+        const { title, description, slug, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+        console.log(req.body);
+
+        if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
+        if (!tags || tags.length === 0) { return res.status(400).json({ error: 'At least one Tag is required' }) }
+
+        let blog = new Blog();
+        blog.title = title;
+        blog.slug = slugify(slug).toLowerCase();
+        blog.description = description;
+        blog.mtitle = mtitle;
+        blog.mdesc = mdesc;
+        blog.photo = photo;
+        blog.date = date;
+        blog.body = body;
+        blog.postedBy = req.auth._id;
+        let strippedContent = striptags(body);
+        let excerpt0 = strippedContent.slice(0, 150);
+        blog.excerpt = excerpt0;
+        try {
+            let arrayOfCategories = categories && categories.split(',');
+            let arrayOfTags = tags && tags.split(',');
+            await blog.save();
+            const updatedBlog = await Blog.findByIdAndUpdate(blog._id, {
+                $push: {
+                    categories: { $each: arrayOfCategories }, tags: { $each: arrayOfTags }
+                }
+            }, { new: true }).exec();
+            res.json(updatedBlog);
+            fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' })
+            fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' })
+        } catch (error) { return res.status(500).json({ error: "Slug should be unique" }) }
     });
-  };
+};
 
 
 export const update = async (req, res) => {
 
     upload.none()(req, res, async (err) => {
-      if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-      try {
-        const slug = req.params.slug.toLowerCase();
-        if (!slug) { return res.status(404).json({ error: 'Blog not found' }) }
-  
-        let blog = await Blog.findOne({ slug }).exec();
+        if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
+        try {
+            const slug = req.params.slug.toLowerCase();
+            if (!slug) { return res.status(404).json({ error: 'Blog not found' }) }
 
-        const { title, description, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
-        const updatefields=req.body;
+            let blog = await Blog.findOne({ slug }).exec();
 
-        Object.keys(updatefields).forEach((key) => {
+            const { title, description, photo, categories, tags, mtitle, mdesc, date, body } = req.body;
+            const updatefields = req.body;
 
-          if (key === 'title') { blog.title = title; }
-          else if (key === 'description') { blog.description = description; }
-          else if (key === 'mtitle') { blog.mtitle = mtitle; }
-          else if (key === 'mdesc') { blog.mdesc = mdesc; }
-          else if (key === 'date') { blog.date = date }
-          else if (key === 'body') { blog.body = body; }
-          else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
-          else if (key === 'tags') { blog.tags = tags.split(',').map(tag => tag.trim()); }
-          else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150);} 
-          else if (key === 'slug') { blog.slug = slugify(updatefields.slug).toLowerCase(); }
-          else if (key === 'photo') { blog.photo = photo; }
-        });
-        const savedBlog = await blog.save();
-        
+            Object.keys(updatefields).forEach((key) => {
 
-        await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
-         fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
-        return res.status(200).json(savedBlog);
-      } catch (error) {
-        console.error("Error updating Blog:", error);
-        return res.status(500).json({ error: "Internal Server Error" });
-      }
+                if (key === 'title') { blog.title = title; }
+                else if (key === 'description') { blog.description = description; }
+                else if (key === 'mtitle') { blog.mtitle = mtitle; }
+                else if (key === 'mdesc') { blog.mdesc = mdesc; }
+                else if (key === 'date') { blog.date = date }
+                else if (key === 'body') { blog.body = body; }
+                else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
+                else if (key === 'tags') { blog.tags = tags.split(',').map(tag => tag.trim()); }
+                else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150); }
+                else if (key === 'slug') { blog.slug = slugify(updatefields.slug).toLowerCase(); }
+                else if (key === 'photo') { blog.photo = photo; }
+            });
+            const savedBlog = await blog.save();
+
+
+            await fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${blog.slug}`, { method: 'POST' });
+            fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' });
+            return res.status(200).json(savedBlog);
+        } catch (error) {
+            console.error("Error updating Blog:", error);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
     });
-    
-  };
+
+};
 
 
 export const remove = async (req, res) => {
@@ -91,8 +94,8 @@ export const remove = async (req, res) => {
         const data = await Blog.findOneAndDelete({ slug }).exec();
         if (!data) { return res.json({ error: 'Blog not found' }); }
         res.json({ message: 'Blog deleted successfully' });
-         fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${slug}`, { method: 'POST' });
-         fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' })
+        fetch(`${process.env.MAIN_URL}/api/revalidate?path=/${slug}`, { method: 'POST' });
+        fetch(`${process.env.MAIN_URL}/api/revalidate?path=/`, { method: 'POST' })
     } catch (error) { res.json({ "error": "Something went wrong" }) }
 };
 
@@ -100,18 +103,15 @@ export const remove = async (req, res) => {
 
 export const relatedposts = async (req, res) => {
     try {
-      const slug = req.params.slug.toLowerCase();
-      const blogpost = await Blog.findOne({ slug }).exec();
-      if (!blogpost) {return res.status(404).json({ error: 'Blog not found' });}
-        
-      const categories = blogpost.categories;
-  
-      const data = await Blog.find({ _id: { $ne: blogpost._id },categories: { $in: categories }, })
-        .populate('postedBy', '_id name username profile').select('title slug postedBy date photo').limit(6);
-        
-      res.status(200).json(data);
-    } catch (err) { res.status(500).json({ error: "Something Went Wrong" });}
-  };
+        const slug = req.params.slug.toLowerCase();
+        const blogpost = await Blog.findOne({ slug }).exec();
+        if (!blogpost) { return res.status(404).json({ error: 'Blog not found' }); }
+        const categories = blogpost.categories;
+        const data = await Blog.find({ _id: { $ne: blogpost._id }, categories: { $in: categories }, })
+            .populate('postedBy', '_id name username profile').select('title slug postedBy date photo').limit(6);
+        res.status(200).json(data);
+    } catch (err) { res.status(500).json({ error: "Something Went Wrong" }); }
+};
 
 
 export const allblogs = async (req, res) => {
@@ -151,8 +151,8 @@ export const list = async (req, res) => {
         const perPage = 10;
         const skip = (page - 1) * perPage;
         const data = await Blog.find({}).populate('postedBy', '-_id name username').sort({ date: -1 }).select('-_id title slug date postedBy').skip(skip).limit(perPage).exec();
-        res.json({totalBlogs: totalCount , data }); 
-    } catch (err) { console.error('Error fetching Blogs:', err); res.status(500).json({ error: 'Internal Server Error' }); }  
+        res.json({ totalBlogs: totalCount, data });
+    } catch (err) { console.error('Error fetching Blogs:', err); res.status(500).json({ error: 'Internal Server Error' }); }
 };
 
 export const listAllBlogsCategoriesTags = async (req, res) => {
@@ -229,7 +229,7 @@ export const list2 = async (req, res) => {
 
         const data = await Blog.find({ postedBy: userId }).populate('postedBy', '-_id name username').sort({ date: -1 }).select('-_id title slug date postedBy').skip(skip).limit(perPage).exec();
 
-        const totalCount = await Blog.countDocuments({postedBy: userId}).exec();
-        res.json({totalBlogs: totalCount , data }); 
-    } catch (err) { console.error('Error fetching Blogs:', err); res.status(500).json({ error: 'Internal Server Error' }); }  
+        const totalCount = await Blog.countDocuments({ postedBy: userId }).exec();
+        res.json({ totalBlogs: totalCount, data });
+    } catch (err) { console.error('Error fetching Blogs:', err); res.status(500).json({ error: 'Internal Server Error' }); }
 };

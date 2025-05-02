@@ -6,8 +6,61 @@ import { expressjwt } from "express-jwt"
 import "dotenv/config.js";
 import { errorHandler } from "../helpers/dbErrorHandler.js"
 import sgMail from "@sendgrid/mail"
+import nodemailer from 'nodemailer';
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    tls: { rejectUnauthorized: false },
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
+
+export const preSignup = async (req, res) => {
+    try {
+        const { name, email, username, password } = req.body;
+
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email is taken' });
+        }
+
+        const token = jwt.sign(
+            { name, username, email, password },
+            process.env.JWT_ACCOUNT_ACTIVATION,
+            { expiresIn: '10m' }
+        );
+
+
+
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: email,
+            subject: 'Account activation link',
+            html: `
+                <p>Please use the following link to activate your account:</p>
+                <p>${process.env.MAIN_URL}/auth/account/activate/${token}</p>
+                <hr />
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.json({
+            message: `Email has been sent to ${email}. Follow the instructions to activate your account.`
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: errorHandler(err) });
+    }
+};
+
+/*
 export const preSignup = async (req, res) => {
     try {
         const { name, email, username, password } = req.body;
@@ -27,8 +80,12 @@ export const preSignup = async (req, res) => {
         };
         await sgMail.send(emailData);
         res.json({ message: `Email has been sent to ${email}. Follow the instructions to activate your account.` });
-    } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: errorHandler(err) });
+    }
 };
+*/
 
 
 
