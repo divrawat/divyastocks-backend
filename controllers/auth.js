@@ -218,7 +218,7 @@ export const canUpdateDeleteBlog = async (req, res, next) => {
 };
 
 
-
+/*
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
@@ -242,7 +242,49 @@ export const forgotPassword = async (req, res) => {
         res.json({ message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10 minutes.` });
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
+*/
 
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'User with that email does not exist' });
+        }
+
+        const token = jwt.sign(
+            { _id: user._id },
+            process.env.JWT_RESET_PASSWORD,
+            { expiresIn: '10m' }
+        );
+
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: email,
+            subject: 'Password reset link',
+            html: `
+                <p>Please use the following link to reset your password:</p>
+                <p>${process.env.MAIN_URL}/auth/password/reset/${token}</p>
+                <hr />
+                <p>This email may contain sensitive information</p>
+                <p>${process.env.MAIN_URL}</p>
+            `
+        };
+
+        await user.updateOne({ resetPasswordLink: token });
+        await transporter.sendMail(mailOptions);
+
+        res.json({
+            message: `Email has been sent to ${email}. Follow the instructions to reset your password. Link expires in 10 minutes.`
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({ error: errorHandler(err) });
+    }
+};
 
 
 export const resetPassword = async (req, res) => {
