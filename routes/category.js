@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import{ create, list, read, remove } from "../controllers/category.js"
+import { create, list, read, remove } from "../controllers/category.js"
 
 // validators
 import { runvalidation } from "../validators/index.js"
@@ -14,7 +14,7 @@ const categoryCreateValidator = [
 ];
 
 
-router.post('/category', categoryCreateValidator, runvalidation, requireSignin, adminMiddleware, create);
+router.post('/category/create', categoryCreateValidator, runvalidation, requireSignin, adminMiddleware, create);
 router.get('/categories', list);
 router.get('/category/:slug', read);
 router.delete('/category/:slug', requireSignin, adminMiddleware, remove);

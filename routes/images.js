@@ -19,20 +19,21 @@ export const allimages = async (req, res) => {
         const perPage = 10;
         const skip = (page - 1) * perPage;
         const data = await Images.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).exec();
-        res.json({totalImages: totalCount , data }); 
-    } catch (err) { console.error('Error fetching images:', err); res.status(500).json({ error: 'Internal Server Error' }); }  
+        res.json({ totalImages: totalCount, data });
+    } catch (err) { console.error('Error fetching images:', err); res.status(500).json({ error: 'Internal Server Error' }); }
 };
 
 
 export const remove = async (req, res) => {
     try {
-        const { url } = req.query;
+        const { url } = req.params;
         if (url) {
             const deletedImage = await Images.findOneAndDelete({ url }).exec();
-            if (deletedImage) { res.json({ message: 'Image deleted successfully' });  
-            } else {  res.status(404).json({ error: 'Image Cannot be found or deleted' });   }
-        } 
-    } catch (err) {  console.error(err);   res.status(500).json({ error: 'Cannot delete image' }); }  
+            if (deletedImage) {
+                res.json({ message: 'Image deleted successfully' });
+            } else { res.status(404).json({ error: 'Image Cannot be found or deleted' }); }
+        }
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Cannot delete image' }); }
 };
 
 
