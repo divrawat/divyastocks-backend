@@ -12,13 +12,6 @@ import formRoutes from "./routes/form.js";
 import ImageRoutes from "./routes/images.js";
 import storyRoutes from "./routes/slides.js";
 import "dotenv/config.js";
-import session from "express-session";
-import passport from "passport";
-import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
-const clientid = process.env.GOOGLE_CLIENT_ID
-const clientsecret = process.env.GOOGLE_CLIENT_SECRET
-import User from "./models/user.js";
-import jwt from "jsonwebtoken";
 import { FRONTEND } from "./config.js";
 
 const app = express();
@@ -46,94 +39,3 @@ app.use('/api', storyRoutes);
 app.get('/', (req, res) => { res.json("Backend index"); });
 const port = process.env.PORT || 8000;
 app.listen(port, () => { console.log(`Server is running on port ${port}`); });
-
-app.use(session({
-  secret: clientsecret,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    secure: true,
-    sameSite: 'None',
-    httpOnly: true
-  },
-}))
-
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-passport.use(
-  new GoogleStrategy({
-    clientID: clientid,
-    clientSecret: clientsecret,
-    callbackURL: "/auth/google/callback",
-    scope: ["profile", "email"]
-  },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ email: profile.emails[0].value }, "email username name profile role");
-        return done(null, user)
-      } catch (error) {
-        return done(error, null)
-      }
-    }
-  )
-)
-
-passport.serializeUser((user, done) => { done(null, user); })
-passport.deserializeUser((user, done) => { done(null, user); });
-
-app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-
-
-app.get("/auth/google/callback", passport.authenticate("google", {
-  successRedirect: `${FRONTEND}`,
-  failureRedirect: `${FRONTEND}/signin`
-}))
-
-
-app.get("/login/success", async (req, res) => {
-  if (req.user) {
-    console.log(req.user);
-    const token = jwt.sign({ _id: req.user._id }, "Div12@", { expiresIn: '10d' });
-    res.status(200).json({ user: req.user, token })
-  }
-  else { res.status(400).json({ message: "Not Authorized" }) }
-})
-
-
-app.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) { return next(err) }
-    res.redirect(`${FRONTEND}/signin`);
-  })
-})
-
-
-
-
-
-
-
-
-
-/*
-app.get("/auth/google/callback", (req, res, next) => {
-  passport.authenticate("google", (err, user) => {
-    if (err || !user) {
-      return res.redirect(`${FRONTEND}/signin`);
-    }
-    req.login(user, (loginErr) => {
-      if (loginErr) {
-        return res.redirect(`${FRONTEND}/signin`);
-      }
-      if (user.role === 1) {
-        return res.redirect(`${FRONTEND}/admin`);
-      } else {
-        return res.redirect(`${FRONTEND}/user`);
-      }
-    });
-  })(req, res, next);
-});
-*/
