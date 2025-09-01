@@ -158,6 +158,7 @@ export const signin = async (req, res) => {
         res.cookie('token', token, { expiresIn: '1d' });
         const { _id, username, name, email, role } = user;
         res.json({ token, user: { _id, username, name, email, role } });
+
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
 };
 
@@ -183,7 +184,7 @@ export const authMiddleware = async (req, res, next) => {
         const authUserId = req.auth._id;
         const user = await User.findById({ _id: authUserId }).exec();
 
-        if (!user) { return res.status(400).json({ error: 'User not found' }); }
+        if (!user) { return res.status(400).json({ error: 'User not found OHH' }); }
         req.profile = user;
         next();
     } catch (err) { res.status(400).json({ error: errorHandler(err) }); }
