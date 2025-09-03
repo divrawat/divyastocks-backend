@@ -22,8 +22,10 @@ app.use(cors({
   credentials: true
 }));
 
+
+
 mongoose.set("strictQuery", true);
-mongoose.connect(process.env.DATABASE, {}).then(() => console.log("DB connected")).catch((err) => console.log("DB Error => ", err));
+mongoose.connect(process.env.DATABASE, { useNewUrlParser: true, useUnifiedTopology: true, }).then(() => console.log("DB connected")).catch((err) => console.log("DB Error => ", err));
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());

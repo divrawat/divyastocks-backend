@@ -10,7 +10,7 @@ const upload = multer({});
 export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
         if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
-        const { title, description, slug, photo, categories, mtitle, mdesc, date, body } = req.body;
+        const { title, description, slug, photo, categories, mtitle, mdesc, date, body, author } = req.body;
 
         if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
 
@@ -24,6 +24,7 @@ export const create = async (req, res) => {
         blog.date = date;
         blog.body = body;
         blog.postedBy = req.auth._id;
+        blog.author = author;
         let strippedContent = striptags(body);
         let excerpt0 = strippedContent.slice(0, 150);
         blog.excerpt = excerpt0;
@@ -56,7 +57,7 @@ export const update = async (req, res) => {
 
             let blog = await Blog.findOne({ slug }).exec();
 
-            const { title, description, photo, categories, mtitle, mdesc, date, body } = req.body;
+            const { title, description, photo, categories, mtitle, mdesc, date, body, author } = req.body;
             const updatefields = req.body;
 
             Object.keys(updatefields).forEach((key) => {
@@ -67,6 +68,7 @@ export const update = async (req, res) => {
                 else if (key === 'mdesc') { blog.mdesc = mdesc; }
                 else if (key === 'date') { blog.date = date }
                 else if (key === 'body') { blog.body = body; }
+                else if (key === 'author') { blog.author = author; }
                 else if (key === 'categories') { blog.categories = categories.split(',').map(category => category.trim()); }
                 else if (key === 'excerpt') { blog.excerpt = strippedContent.slice(0, 150); }
                 else if (key === 'slug') { blog.slug = slugify(updatefields.slug).toLowerCase(); }
@@ -193,8 +195,7 @@ export const listAllBlogsCategoriesTags = async (req, res) => {
         const blogs = await Blog.find({})
             .sort({ date: -1 })
             .populate('categories', 'name slug')
-            .populate('postedBy', 'name username profile')
-            .select('title photo slug excerpt categories date postedBy')
+            .select('title photo slug excerpt categories date author')
             .skip(skip)
             .limit(perPage)
             .exec();
@@ -226,8 +227,8 @@ export const read = async (req, res) => {
         const slug = req.params.slug.toLowerCase();
 
         const data = await Blog.findOne({ slug })
-            .populate('categories', ' name slug').populate('postedBy', 'name username')
-            .select('photo title body slug mtitle mdesc date categories postedBy').exec();
+            .populate('categories', ' name slug')
+            .select('photo title body slug mtitle mdesc date categories author').exec();
 
         const recentPosts = await Blog.find({}).sort({ date: -1 }).select('title _id slug photo date').limit(10).exec();
         if (!data) { return res.status(404).json({ error: 'Blogs not found' }); }
