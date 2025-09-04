@@ -6,7 +6,7 @@ import { requireSignin, adminMiddleware, authMiddleware, canUpdateDeleteBlog } f
 router.post('/blog/create', requireSignin, adminMiddleware, create);
 router.get('/blogs', list);
 router.get('/blog/allblogs', allblogs);
-router.get('/rss', feeds);
+router.get('/rss-feeds', feeds);
 router.get('/blogs/search', listSearch);
 router.get('/blogs-categories-tags', listAllBlogsCategoriesTags);
 router.get('/blog/:slug', read);

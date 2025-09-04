@@ -11,6 +11,8 @@ export const create = async (req, res) => {
     upload.none()(req, res, async (err) => {
         if (err) { return res.status(400).json({ error: 'Something went wrong' }) }
         const { title, description, slug, photo, categories, mtitle, mdesc, date, body, author } = req.body;
+        console.log(req.body);
+
 
         if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
 
@@ -170,7 +172,7 @@ export const allblogslugs = async (req, res) => {
 export const feeds = async (req, res) => {
     try {
         const data = await Blog.find({}).sort({ date: -1 })
-            .select('-_id title excerpt mdesc slug date body').limit(7).exec();
+            .select(' title mdesc slug date body author photo').limit(10).exec();
         res.json(data);
     } catch (err) { res.json({ error: errorHandler(err) }); }
 };
