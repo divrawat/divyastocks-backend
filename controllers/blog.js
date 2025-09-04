@@ -14,9 +14,17 @@ export const create = async (req, res) => {
 
         if (!categories || categories.length === 0) { return res.status(400).json({ error: 'At least one category is required' }) }
 
+
+        const generate8DigitId = () => { return Math.floor(10000000 + Math.random() * 90000000).toString(); };
+
+
         let blog = new Blog();
         blog.title = title;
-        blog.slug = slugify(slug).toLowerCase();
+
+        // blog.slug = slugify(slug).toLowerCase();
+        const uniqueId = generate8DigitId();
+        blog.slug = `${slugify(slug).toLowerCase()}-${uniqueId}`;
+
         blog.description = description;
         blog.mtitle = mtitle;
         blog.mdesc = mdesc;
