@@ -98,7 +98,7 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
         for (const file of req.files) {
             // Convert buffer to WebP using sharp
             const webpBuffer = await sharp(file.buffer)
-                .webp({ quality: 80 }) // Optional: set WebP quality
+                .webp({ quality: 75 }) // Optional: set WebP quality
                 .toBuffer();
 
             // Create new filename with .webp extension
