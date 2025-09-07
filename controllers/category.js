@@ -100,7 +100,7 @@ export const read = async (req, res) => {
         const blogs = await Blog.find({ categories: category._id })
             .sort({ date: -1 })
             .populate('categories', 'name slug')
-            .select('title photo slug excerpt categories date')
+            .select('title photo slug excerpt categories date author')
             .skip(skip)
             .limit(perPage)
             .exec();
