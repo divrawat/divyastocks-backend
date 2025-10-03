@@ -16,11 +16,7 @@ import { FRONTEND } from "./config.js";
 
 const app = express();
 
-app.use(cors({
-  origin: ["http://localhost:3000", FRONTEND, 'https://divyastocks-frontend.pages.dev/, https://divyastocks.online'],
-  methods: "GET,POST,PUT,DELETE,PATCH",
-  credentials: true
-}));
+app.use(cors());
 
 
 
