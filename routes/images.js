@@ -115,7 +115,7 @@ router.post('/images/upload', upload.array('images', 10), async (req, res) => {
 
             await s3Client.send(new PutObjectCommand(uploadParams));
 
-            const publicUrl = `${process.env.R2_UPLOAD_DOMAIN}/${key}`;
+            const publicUrl = `${key}`;
             uploadedUrls.push(publicUrl);
 
             await new Images({ url: publicUrl }).save();
