@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 import Blog from "./models/blog.js";
 import Images from "./models/images.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // ✅ Your MongoDB connection string
-const MONGO_URI = "mongodb+srv://divrawat2001:EUfHuFccwpkIaSQE@cluster-coding4u.vkzwjje.mongodb.net/divyastocks?retryWrites=true&w=majority";
+const MONGO_URI = process.env.DATABASE;
 
 const OLD_DOMAIN = "https://images.divyastocks.online/";
 
